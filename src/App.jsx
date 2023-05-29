@@ -6,6 +6,7 @@ import { WinnerModal } from "./components/WinnerModal"
 import { TURNS } from "./constanst"
 //logica para revisar si hay ganador y si el juego ha termiado en empate
 import { checkWinner, checkEndGame } from "./logic/board"
+import { saveGameToStorage, resetGameStorage } from "./logic/storage"
 
 function App() {
 
@@ -38,8 +39,9 @@ function App() {
     setBoard(Array(9).fill(null))
     setTurn(TURNS.X)
     setWinner(null)
-    window.localStorage.removeItem('board')
-    window.localStorage.removeItem('turn')
+    
+    // resetea el estado del componente
+    resetGameStorage()
   }
 
   const updateBoard = (index) => {
@@ -56,8 +58,10 @@ function App() {
     setTurn(newTurn)
 
     // guarda la partida
-    window.localStorage.setItem('board', JSON.stringify(newBoard))
-    window.localStorage.setItem('turn', newTurn)
+    saveGameToStorage({
+      board: newBoard,
+      turn: newTurn
+    })
 
     // se revisa si existe ganador
     const newWinner = checkWinner(newBoard)
