@@ -8,14 +8,38 @@ import { TURNS } from "./constanst"
 import { checkWinner, checkEndGame } from "./logic/board"
 
 function App() {
-  const [board, setBoard] = useState(Array(9).fill(null))
-  const [turn, setTurn] = useState(TURNS.X)
+
+  // esta es la inicializacion del tablero antes de usar localstorage para guardar la partida
+  // const [board, setBoard] = useState(Array(9).fill(null))
+
+  // inicializacion de tablero
+  const [board, setBoard] = useState(() => {
+    // como se obtendra el local storage en el useState no se le pasa un valor inicial, sino, una funcion
+    // la obtencion de el localstorage se realiza aqui, ya que, esto se ejecuta una vez,
+    // en caso de ponerlo fuera de la inicializacion, cada que se renderea se ejecutara la obtencion de
+    // localstorage alentando a la app
+    const boardFromStorage = window.localStorage.getItem('board')
+    if (boardFromStorage) return JSON.parse(boardFromStorage)
+    return Array(9).fill(null)
+  })
+
+  // se inicializa el turno por defecto las X
+  // de igual manera esta inicializacion era antes de usar localstorage para guardar el turno
+  // const [turn, setTurn] = useState(TURNS.X)
+  const [turn, setTurn] = useState(() => {
+    const turnFromStorage = window.localStorage.getItem('turn')
+    return turnFromStorage ?? TURNS.X
+    // if (turnFromStorage) return turnFromStorage
+    // return TURNS.X
+  })
   const [winner, setWinner] = useState(null)
 
   const resetGame = () => {
     setBoard(Array(9).fill(null))
     setTurn(TURNS.X)
     setWinner(null)
+    window.localStorage.removeItem('board')
+    window.localStorage.removeItem('turn')
   }
 
   const updateBoard = (index) => {
@@ -30,6 +54,10 @@ function App() {
     // cambiar de turno
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
+
+    // guarda la partida
+    window.localStorage.setItem('board', JSON.stringify(newBoard))
+    window.localStorage.setItem('turn', newTurn)
 
     // se revisa si existe ganador
     const newWinner = checkWinner(newBoard)
